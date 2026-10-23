@@ -51,3 +51,7 @@ That version matches the pre-installed Chromium (revision 1194) in the build san
 ## D-011 · Brand fonts via `next/font/google`
 
 Fraunces, Geist and Geist Mono are self-hosted at build time by `next/font`, so there are no runtime requests to Google and `font-src 'self'` holds. In Lite mode (M1) the font CSS variables are not attached to `<html>`, so the browser never downloads them and the system stack applies.
+
+## D-012 · What the backend repo actually contains (M0 review)
+
+`1billionco/funnel-aether-backend` (`main` and `branding-for-funnel-aether-79d7d` are identical, about 970 lines of Python) contains **only the brand-voice service**: profile and document models, chunking, retrieval, and the training-quality score (type diversity 40 + required types 20 + chunk volume 30 + document count 10, capped at 100). It does **not** contain the heuristic lead scoring, the analytics guardrail definitions, the brand-alignment output score, or the Sarah/Chinedu seed data that §0 lists. Brand voice will be ported in M2. Unless Joshua supplies the originals, the rest is built fresh from the spec (§6.4, §8, §10, §11 and Appendix A personas), with the formulas recorded here.
