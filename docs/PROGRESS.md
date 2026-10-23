@@ -18,6 +18,8 @@
 
 **Tests:** unit 14 · db 2 · e2e 12 (6 per viewport: rendering, theme persistence, axe in light and dark, no overflow at 360px, headers).
 
+**CI:** green on GitHub (`1billionco/funnel-aether`, run 39966008178). Two CI-only fixes: `typecheck` now runs `next typegen` first, and runners are pinned to `ubuntu-24.04` (D-013).
+
 **Not done / blocked**
 
-- No GitHub remote or Netlify site yet; Joshua creates these (see the M0 summary). "CI green" and "Netlify preview shows `/dev/ui`" are verified locally only until then.
+- Netlify site not connected yet (Joshua). The "Netlify preview shows `/dev/ui`" check is still pending.
