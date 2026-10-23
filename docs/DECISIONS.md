@@ -57,4 +57,5 @@ Fraunces, Geist and Geist Mono are self-hosted at build time by `next/font`, so 
 `1billionco/funnel-aether-backend` (`main` and `branding-for-funnel-aether-79d7d` are identical, about 970 lines of Python) contains **only the brand-voice service**: profile and document models, chunking, retrieval, and the training-quality score (type diversity 40 + required types 20 + chunk volume 30 + document count 10, capped at 100). It does **not** contain the heuristic lead scoring, the analytics guardrail definitions, the brand-alignment output score, or the Sarah/Chinedu seed data that §0 lists. Brand voice will be ported in M2. Unless Joshua supplies the originals, the rest is built fresh from the spec (§6.4, §8, §10, §11 and Appendix A personas), with the formulas recorded here.
 
 ## D-013 · CI runners pinned to `ubuntu-24.04`
+
 `ubuntu-latest` moved to Ubuntu 26 on 19 Oct 2026, and `playwright install --with-deps` for the pinned Playwright 1.56 failed there. The runners are pinned to 24.04 until Playwright is upgraded (do that together with the sandbox browser, D-010).
