@@ -1,0 +1,17 @@
+# Netlify config. Netlify auto-detects Next.js and deploys it with its
+# OpenNext-based Next.js runtime; no plugin entry is needed.
+[build]
+  command = "pnpm build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Standalone background / scheduled functions (not Next.js routes).
+# Background functions use the "-background" filename suffix (up to 15 min).
+# Scheduled functions declare `config.schedule` in code and only run on
+# published deploys. Schedules are UTC.
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

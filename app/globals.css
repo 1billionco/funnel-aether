@@ -1,26 +1,195 @@
 @import "tailwindcss";
 
+/*
+ * Funnel Aether design tokens — "calm control" (spec §7.2).
+ * Raw values live on :root and are swapped for dark mode; Tailwind utilities
+ * (bg-paper, text-ink, border-line, …) read them through @theme inline.
+ *
+ * Contrast notes (WCAG 2.1 AA, see docs/DECISIONS.md D-004):
+ * - Amber #D97706 fails as text on white (3.2:1). Amber fills carry ink text;
+ *   amber *text* uses --amber-ink.
+ * - Teal #0F766E fails as text on dark surfaces, so dark mode uses a lighter
+ *   --primary-fg for text/links while buttons keep the brand teal fill.
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #f7f5f0;
+  --surface: #ffffff;
+  --ink: #15171f;
+  --muted: #6b6f7b;
+  --line: #e6e2d8;
+
+  --primary: #0f766e;
+  --primary-hover: #0b5f58;
+  --primary-tint: #e6f2f0;
+  --primary-fg: #0f766e; /* teal used as text */
+  --on-primary: #ffffff;
+
+  --amber: #d97706;
+  --amber-tint: #fdf3e1;
+  --amber-ink: #92400e;
+  --on-amber: #15171f;
+
+  --approve: #15803d;
+  --approve-fg: #166534; /* green text on its own tint needs the darker shade */
+  --danger: #b42318;
+  --danger-fg: #b42318;
+  --info: #3b5bdb;
+  --info-fg: #3b5bdb;
+
+  --focus: #0f766e;
+  --overlay: rgb(21 23 31 / 0.45);
+
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Dark: follow the OS unless the user forced light; data-theme="dark" forces dark. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --paper: #111318;
+    --surface: #181b22;
+    --ink: #ecedef;
+    --muted: #9a9ea8;
+    --line: #262a33;
+    --primary-tint: #12302d;
+    --primary-fg: #2dd4bf;
+    --amber-tint: #33240f;
+    --amber-ink: #f59e0b;
+    --approve-fg: #4ade80;
+    --danger-fg: #f97066;
+    --info-fg: #8da2fb;
+    --focus: #2dd4bf;
+    --overlay: rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #111318;
+  --surface: #181b22;
+  --ink: #ecedef;
+  --muted: #9a9ea8;
+  --line: #262a33;
+  --primary-tint: #12302d;
+  --primary-fg: #2dd4bf;
+  --amber-tint: #33240f;
+  --amber-ink: #f59e0b;
+  --approve-fg: #4ade80;
+  --danger-fg: #f97066;
+  --info-fg: #8da2fb;
+  --focus: #2dd4bf;
+  --overlay: rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+  &:where([data-theme="dark"] *) {
+    @slot;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-tint: var(--primary-tint);
+  --color-primary-fg: var(--primary-fg);
+  --color-on-primary: var(--on-primary);
+  --color-amber: var(--amber);
+  --color-amber-tint: var(--amber-tint);
+  --color-amber-ink: var(--amber-ink);
+  --color-on-amber: var(--on-amber);
+  --color-approve: var(--approve);
+  --color-approve-fg: var(--approve-fg);
+  --color-danger: var(--danger);
+  --color-danger-fg: var(--danger-fg);
+  --color-info: var(--info);
+  --color-info-fg: var(--info-fg);
+  --color-focus: var(--focus);
+  --color-overlay: var(--overlay);
+
+  /* Fonts: variables are only attached to <html> when web fonts are allowed
+     (not in Lite mode), so these fall back to the system stack. */
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, "Times New Roman", serif;
+}
+
+@theme {
+  /* Type scale 12/14/16/20/24/32/44 */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem;
+  --text-base--line-height: 1.55;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.4;
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 2rem;
+  --text-2xl--line-height: 1.2;
+  --text-3xl: 2.75rem;
+  --text-3xl--line-height: 1.1;
+
+  --radius-card: 10px;
+  --radius-input: 8px;
+
+  --ease-calm: cubic-bezier(0.2, 0, 0, 1);
+  --default-transition-duration: 180ms;
+  --default-transition-timing-function: var(--ease-calm);
+
+  --shadow-soft: 0 1px 2px rgb(21 23 31 / 0.04), 0 4px 16px rgb(21 23 31 / 0.04);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (min-width: 768px) {
+    body {
+      font-size: 16px;
+    }
+  }
+  *,
+  ::before,
+  ::after {
+    border-color: var(--line);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--primary-tint);
+    color: var(--ink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
