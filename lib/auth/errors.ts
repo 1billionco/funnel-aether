@@ -12,6 +12,9 @@ const MESSAGES: Record<string, string> = {
   rate_limited: "Too many attempts. Wait a few minutes and try again.",
   invalid_credentials: "That email and password don't match. Try again or use an email link.",
   not_configured: "Sign-in isn't set up on this server yet (no database connected).",
+  email_not_confirmed:
+    "Confirm your email first: open the link we sent you. If it has expired, sign up again with the same email to get a new one.",
+  link_expired: "That link has expired or was already used. Request a new one.",
 };
 
 export function friendlyError(codeOrMessage: string | undefined | null): string {
@@ -20,6 +23,9 @@ export function friendlyError(codeOrMessage: string | undefined | null): string 
     if (codeOrMessage.includes(code)) return message;
   }
   if (/invalid login credentials/i.test(codeOrMessage)) return MESSAGES.invalid_credentials!;
+  if (/email not confirmed/i.test(codeOrMessage)) return MESSAGES.email_not_confirmed!;
+  if (/otp_expired|invalid or has expired|code verifier/i.test(codeOrMessage))
+    return MESSAGES.link_expired!;
   if (/already registered/i.test(codeOrMessage))
     return "You already have an account. Sign in instead.";
   return "Something went wrong. Please try again.";

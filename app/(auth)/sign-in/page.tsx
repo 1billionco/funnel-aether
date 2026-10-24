@@ -11,10 +11,6 @@ import { services } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Sign in" };
 
-const ERRORS: Record<string, string> = {
-  link_expired: "That sign-in link has expired or was already used. Request a new one.",
-};
-
 export default async function SignInPage({ searchParams }: PageProps<"/sign-in">) {
   const params = await searchParams;
   const next = typeof params.next === "string" ? safeNextPath(params.next, "") : "";
@@ -32,7 +28,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
         mode="sign-in"
         next={next}
         inviteRequired={false}
-        initialError={errorParam ? (ERRORS[errorParam] ?? friendlyError(errorParam)) : undefined}
+        initialError={errorParam ? friendlyError(errorParam) : undefined}
       />
       <p className="text-sm text-muted">
         New here?{" "}

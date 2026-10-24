@@ -75,8 +75,10 @@ export async function signInWithPassword(
     email: parsed.data.email,
     password: parsed.data.password,
   });
-  if (error || !data.user)
-    return { message: friendlyError(error?.message), email: parsed.data.email };
+  if (error || !data.user) {
+    console.error("[auth/sign-in]", error?.code ?? "", error?.message ?? "no user");
+    return { message: friendlyError(error?.code ?? error?.message), email: parsed.data.email };
+  }
   const home = await afterSignIn(db, data.user);
   redirect(safeNextPath(parsed.data.next, home));
 }

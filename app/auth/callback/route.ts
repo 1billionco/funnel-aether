@@ -13,8 +13,13 @@ import { afterSignIn } from "@/lib/auth/post-sign-in";
 export async function GET(request: NextRequest) {
   const url = request.nextUrl;
   const requestedNext = url.searchParams.get("next");
-  const fail = (reason: string) =>
-    NextResponse.redirect(new URL(`/sign-in?error=${encodeURIComponent(reason)}`, request.url));
+  const fail = (reason: string, detail?: string) => {
+    // Shows in the Netlify function log; the visitor only sees a mapped message.
+    console.error("[auth/callback]", reason, detail ?? "");
+    return NextResponse.redirect(
+      new URL(`/sign-in?error=${encodeURIComponent(reason)}`, request.url),
+    );
+  };
 
   const db = await createSupabaseServerClient();
   if (!db) return fail("not_configured");
@@ -25,12 +30,16 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const { error } = await db.auth.exchangeCodeForSession(code);
-    if (error) return fail("link_expired");
+    if (error) return fail("link_expired", `exchange: ${error.message}`);
   } else if (tokenHash && type) {
     const { error } = await db.auth.verifyOtp({ token_hash: tokenHash, type });
-    if (error) return fail("link_expired");
+    if (error) return fail("link_expired", `verify: ${error.message}`);
   } else {
-    return fail(url.searchParams.get("error_description") ?? "link_expired");
+    // Supabase reports link errors as error_code (e.g. otp_expired) plus a description.
+    return fail(
+      "link_expired",
+      `${url.searchParams.get("error_code") ?? "no_code"}: ${url.searchParams.get("error_description") ?? ""}`,
+    );
   }
 
   const { data } = await db.auth.getUser();
