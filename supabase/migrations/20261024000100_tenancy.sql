@@ -266,6 +266,9 @@ create table private.rate_limits (
   tokens double precision not null,
   updated_at timestamptz not null default now()
 );
+-- Not exposed via the Data API, but locked anyway (defence in depth). The
+-- SECURITY DEFINER function below runs as the table owner and is unaffected.
+alter table private.rate_limits enable row level security;
 
 -- ---------------------------------------------------------------- RLS
 alter table public.organizations enable row level security;
