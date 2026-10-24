@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 
-import { advanceSetup } from "@/app/(app)/[org]/_actions/brand";
+import { advanceSetup, finishOnboarding } from "@/app/(app)/[org]/_actions/brand";
+import { CreateStudio } from "@/components/create/create-studio";
+import { typicalEstimates } from "@/lib/credits/estimates";
+import { createSupabaseServiceClient } from "@/lib/db/service";
+import { templatesFor } from "@/lib/templates";
 import { DocumentList } from "@/components/brand/document-list";
 import { SampleUploader } from "@/components/brand/sample-uploader";
 import { SummaryCard } from "@/components/brand/summary-card";
@@ -38,6 +42,7 @@ function Footer({
 export async function SetupStepBody({
   step,
   slug,
+  org,
   brand,
   skip,
 }: {
@@ -87,11 +92,39 @@ export async function SetupStepBody({
     );
   }
 
+  // first-draft: one preset template for the market, then land in Review.
+  const estimates = await typicalEstimates(createSupabaseServiceClient(), org);
+  const templateId = org.market === "NG" ? "ng-weekend-whatsapp" : "uk-linkedin-insight";
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="font-display text-2xl">Your first draft</h1>
-      <p className="text-muted">Coming next.</p>
-      <Footer slug={slug} step={step} skip={skip} label="Finish" />
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="font-display text-2xl">Let&apos;s write your first draft</h1>
+        <p className="mt-1 text-muted">
+          We&apos;ve picked a starter. Change anything, then press Generate. You&apos;ll approve it
+          next.
+        </p>
+      </div>
+      <CreateStudio
+        slug={slug}
+        brandName={brand.name}
+        defaults={{ offer: brand.offer ?? "", audience: brand.audience ?? "" }}
+        templates={templatesFor(org.market)}
+        estimates={estimates}
+        balance={org.credit_balance_milli}
+        canGenerate
+        compact
+        initialTemplateId={templateId}
+        onDone={
+          <form
+            action={finishOnboarding.bind(null, slug, "review")}
+            className="flex flex-col gap-2 rounded-card border border-amber/40 bg-amber-tint p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p className="text-sm">Your draft is waiting for your approval.</p>
+            <Button type="submit">Review and approve it</Button>
+          </form>
+        }
+      />
+      <div className="flex justify-end border-t border-line pt-6">{skip}</div>
     </div>
   );
 }

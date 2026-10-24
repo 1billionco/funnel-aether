@@ -107,3 +107,40 @@ The spec says prices are never hard-coded and Joshua fills them in. The table is
 ## D-025 · Model request profiles (M2)
 
 The LLM request shape is chosen per model family (`lib/ai/anthropic.ts` `modelProfile`). On Haiku 5.5 thinking is off and effort is low (short marketing copy doesn't benefit from it). Sonnet 5.5 uses `thinking: between_tools` (its supported way to turn thinking off) at medium effort, plus Anthropic's server-side refusal fallback (`fallbacks: "default"`), which reruns a declined request on another model inside the same call. No sampling parameters are sent (the API rejects `temperature` since 21 Oct 2026). Prompt caching markers go on the stable brand block only when it is at least 512 tokens, the minimum for current models.
+
+## D-026 · Brand-match score designed fresh (M3)
+
+The backend's alignment scorer wasn't in the repo (D-012), so `lib/ai/quality.ts` implements §6.4 directly:
+
+- **Similarity (up to 70 points):** half from the cosine similarity to the brand centroid, half from the best match among the 3 nearest chunks. Raw similarity is normalised per embedder (mock 0.02–0.40, Voyage 0.30–0.80).
+- **Call to action:** +15.
+- **Fits the channel's length limit:** +10.
+- **Uses a favourite phrase:** +5.
+- **Penalties:** −15 per avoided word (capped at −30) and −5 for American spelling in UK orgs.
+- **No samples yet:** a neutral 40 replaces the similarity part.
+
+The top 3 reasons, problems first, show as a chip. **Revisit** the Voyage normalisation range against real data in the beta.
+
+## D-027 · Monthly credits top up, packs carry over (M3)
+
+At each new period the balance is topped up to the plan allowance (`greatest(0, allowance − balance)`). Unused monthly credits don't accumulate, but anything above the allowance (future NG credit packs) is kept. Free periods roll monthly from org creation. The grant happens in `create_organization`'s onboarding step and lazily inside `reserve_generation`, so it never depends on a scheduled job firing.
+
+## D-028 · Budget breach pauses the day; the kill switch is manual (M3)
+
+`reserve_generation` treats the global daily budget as a pause for that UTC day ("capacity paused for today"). It records `breached_at` and a `budget_breached` event the first time. The persistent `ai_kill_switch` is only flipped by a human in `/admin`. Emailing Joshua on breach waits for M5 (Resend); until then it's an event plus a server log line, shown in admin.
+
+## D-029 · Escalation only when time allows (M3)
+
+Streamed short outputs escalate to the smart model on a low brand match (< 60) only if more than 12 s remain before the deadline. The escalation is a second reservation and a new version with `router_reason = low_brand_match`. Long-form types already route to the smart model on paid plans. A regenerate-with-feedback after a fast attempt routes to smart (`regen_after_fast`). Free plans never reach the smart model (exhaustively unit-tested).
+
+## D-030 · Output contract: streamed body, then a META block (M3)
+
+Variants are separated by `===VARIANT===`, followed by `===META===` and JSON (title, subject, preheader, hashtags, cta, flags). Only the text before META streams to the user; the parser tolerates code fences and missing or broken JSON. That gives a streamed body plus structured fields in one call, without needing structured-output mode on a streaming request. Model flags merge with a rule-based detector (scarcity, testimonials, regulated claims, avoided words).
+
+## D-031 · Draft writes go through the server (M3)
+
+Members can read drafts, versions, audit and ledger under RLS; all writes use the service role via `withOrg` after an app-level role check. Owners and editors can create, edit and regenerate; reviewers can approve, reject, schedule and mark as posted. That keeps server-owned fields (credits, model, scores) safe without per-column grants on a busy table.
+
+## D-032 · Undo is a server action, not a delayed commit (M3)
+
+Approve and reject happen immediately, so nothing is lost if the tab closes. The toast's Undo calls `undoDecision`, which works for the same user within 10 minutes and is audited as `undo`.

@@ -5,9 +5,10 @@ import { Wordmark } from "@/components/app/wordmark";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireFounderAdmin } from "@/lib/auth/session";
+import { aiStats } from "@/lib/admin/ai-stats";
 import { createSupabaseServiceClient } from "@/lib/db/service";
 
-import { CreateInviteForm, SignupSettingsForm } from "./forms";
+import { AiControlsForm, CreateInviteForm, SignupSettingsForm } from "./forms";
 
 export const metadata: Metadata = { title: "Founder admin", robots: { index: false } };
 
@@ -19,7 +20,7 @@ export default async function AdminPage() {
   const db = createSupabaseServiceClient();
   if (!db) return <p className="p-8">Set SUPABASE_SERVICE_ROLE_KEY to use the admin.</p>;
 
-  const [{ data: settings }, { data: invites }, { data: orgs }] = await Promise.all([
+  const [{ data: settings }, { data: invites }, { data: orgs }, stats] = await Promise.all([
     db.from("app_settings").select("*").eq("id", true).single(),
     db.from("beta_invites").select("*").order("created_at", { ascending: false }).limit(50),
     db
@@ -29,7 +30,10 @@ export default async function AdminPage() {
       )
       .order("created_at", { ascending: false })
       .limit(100),
+    aiStats(db),
   ]);
+  const blend = stats.fastPct;
+  const spent = stats.spentUsd;
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 md:px-8">
@@ -38,6 +42,29 @@ export default async function AdminPage() {
         title="Founder admin"
         description="Beta controls. Guardrail tiles, funnel and cost telemetry arrive with analytics."
       />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>AI spend and kill switch</CardTitle>
+          <CardDescription>
+            Today: <span className="font-mono">${spent.toFixed(3)}</span> of{" "}
+            <span className="font-mono">
+              ${Number(settings?.ai_daily_budget_usd ?? 0).toFixed(2)}
+            </span>
+            {stats.breached ? " · Budget reached: generation paused until tomorrow (UTC)." : ""}
+            {settings?.ai_kill_switch ? " · Kill switch is ON." : ""} · Router blend (7 days):{" "}
+            {blend === null
+              ? "no drafts yet"
+              : `${blend}% fast / ${100 - blend}% smart (target ≈ 85/15)`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AiControlsForm
+            killSwitch={!!settings?.ai_kill_switch}
+            budget={Number(settings?.ai_daily_budget_usd ?? 5)}
+          />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

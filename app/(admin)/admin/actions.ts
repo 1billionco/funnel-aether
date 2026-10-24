@@ -89,3 +89,36 @@ export async function createInvite(_prev: AdminState, formData: FormData): Promi
   revalidatePath("/admin");
   return { ok: true, message: `Created ${code}.` };
 }
+
+const aiSchema = z.object({
+  killSwitch: z.enum(["on", "off"]),
+  budget: z.coerce.number().min(0).max(10_000),
+});
+
+/** Kill switch + global daily AI budget (spec §6.6). */
+export async function saveAiControls(_prev: AdminState, formData: FormData): Promise<AdminState> {
+  const { db, user } = await adminDb();
+  const parsed = aiSchema.safeParse({
+    killSwitch: formData.get("killSwitch") ?? "off",
+    budget: formData.get("budget"),
+  });
+  if (!parsed.success) return { message: "Check the budget and try again." };
+  const { error } = await db
+    .from("app_settings")
+    .update({
+      ai_kill_switch: parsed.data.killSwitch === "on",
+      ai_daily_budget_usd: parsed.data.budget,
+      updated_by: user.id,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", true);
+  if (error) return { message: error.message };
+  await db
+    .from("admin_audit")
+    .insert({ actor: user.id, action: "ai_controls", payload: parsed.data });
+  revalidatePath("/admin");
+  return {
+    ok: true,
+    message: parsed.data.killSwitch === "on" ? "AI generation is paused for everyone." : "Saved.",
+  };
+}

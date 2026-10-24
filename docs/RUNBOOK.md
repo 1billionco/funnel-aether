@@ -15,7 +15,9 @@ _To do (M9)._ For each secret in `docs/ENV.md`: create a new key, update Netlify
 
 ## Disabling AI (kill-switch)
 
-_To do (M3)._ Admin → Guardrails → AI kill-switch, or set `app_settings.ai_kill_switch = true` in SQL.
+`/admin` → "AI spend and kill switch" → AI generation: **Paused** → Save. Every new generation then returns "AI drafting is paused for today…"; in-flight ones finish. In an emergency, run `update app_settings set ai_kill_switch = true;` in the Supabase SQL editor. The daily budget (`ai_daily_budget_usd`) pauses generation automatically for the rest of the UTC day once reached.
+
+Stuck drafts: the `sweep-drafts` scheduled function marks drafts stuck in "generating" for over 2 minutes as failed or partial and refunds them. To run it by hand: `select sweep_stuck_drafts();`.
 
 ## Restoring a deleted organisation within the grace period
 

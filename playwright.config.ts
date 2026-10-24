@@ -15,11 +15,19 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: { baseURL, trace: "retain-on-failure" },
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"] } },
+    { name: "desktop", use: { ...devices["Desktop Chrome"] }, testIgnore: /\.global\.spec\.ts$/ },
     // Chinedu's phone: 360px wide is the minimum we support (M1 done-criteria).
     {
       name: "mobile-360",
       use: { ...devices["Galaxy S9+"], viewport: { width: 360, height: 740 } },
+      testIgnore: /\.global\.spec\.ts$/,
+    },
+    // Tests that flip global settings (kill switch) run alone, after the rest.
+    {
+      name: "global-settings",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /\.global\.spec\.ts$/,
+      dependencies: ["desktop", "mobile-360"],
     },
   ],
   webServer: process.env.E2E_BASE_URL

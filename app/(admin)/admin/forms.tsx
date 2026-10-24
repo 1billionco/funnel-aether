@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label, Select } from "@/components/ui/primitives";
 
-import { createInvite, saveSignupSettings, type AdminState } from "./actions";
+import { createInvite, saveAiControls, saveSignupSettings, type AdminState } from "./actions";
 
 function Status({ state }: { state: AdminState }) {
   if (!state.message) return null;
@@ -86,6 +86,36 @@ export function CreateInviteForm() {
       <Status state={state} />
       <Button type="submit" disabled={pending} className="self-start">
         Create invite
+      </Button>
+    </form>
+  );
+}
+
+export function AiControlsForm({ killSwitch, budget }: { killSwitch: boolean; budget: number }) {
+  const [state, action, pending] = useActionState<AdminState, FormData>(saveAiControls, {});
+  return (
+    <form action={action} className="flex flex-col gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="killSwitch">AI generation</Label>
+          <Select
+            id="killSwitch"
+            name="killSwitch"
+            defaultValue={killSwitch ? "on" : "off"}
+            options={[
+              { value: "off", label: "Running" },
+              { value: "on", label: "Paused (kill switch on)" },
+            ]}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="budget">Daily AI budget (USD)</Label>
+          <Input id="budget" name="budget" type="number" min={0} step="0.5" defaultValue={budget} />
+        </div>
+      </div>
+      <Status state={state} />
+      <Button type="submit" variant="outline" disabled={pending} className="self-start">
+        Save
       </Button>
     </form>
   );

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Inbox, Sparkles, Users } from "lucide-react";
 
+import { CreditsRing } from "@/components/app/credits-meter";
 import { CoreLoopChecklist } from "@/components/today/checklist";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { StateBlock } from "@/components/ui/misc";
 import { requireOrg } from "@/lib/auth/session";
 import { getPrimaryBrand } from "@/lib/brands";
 import { coreLoop } from "@/lib/core-loop";
+import { limit } from "@/lib/credits/plans";
 import { greeting, longDate } from "@/lib/format";
 import { getCoreLoopInput } from "@/lib/today-data";
 
@@ -70,7 +72,7 @@ export default async function TodayPage({ params }: PageProps<"/[org]/today">) {
               >
                 <span className="font-display text-3xl">{input.pendingDrafts}</span>
                 <span className="flex-1">
-                  draft{input.pendingDrafts === 1 ? "" : "s"} need your decision
+                  {input.pendingDrafts === 1 ? "draft needs" : "drafts need"} your decision
                 </span>
                 <ArrowRight className="size-4" aria-hidden />
               </Link>
@@ -108,14 +110,20 @@ export default async function TodayPage({ params }: PageProps<"/[org]/today">) {
               This week
             </h2>
             <p className="mt-2 text-muted">
-              {input.draftsApproved > 0
-                ? `You approved ${input.draftsApproved} draft${input.draftsApproved === 1 ? "" : "s"}.`
-                : "Nothing published yet this week. Your first approved draft will show here."}
+              {input.approvedThisWeek > 0
+                ? `You approved ${input.approvedThisWeek} draft${input.approvedThisWeek === 1 ? "" : "s"}${input.postedThisWeek ? ` and posted ${input.postedThisWeek}` : ""}.`
+                : "Nothing approved yet this week. Your first approved draft will show here."}
             </p>
           </section>
         </div>
 
         <aside className="flex flex-col gap-6">
+          <section aria-label="Credits" className="rounded-card border border-line bg-surface p-5">
+            <CreditsRing
+              balance={org.credit_balance_milli}
+              allowance={limit(org, "monthly_credits_milli")}
+            />
+          </section>
           {!loop.complete ? (
             <CoreLoopChecklist slug={slug} steps={loop.steps} done={loop.done} total={loop.total} />
           ) : null}

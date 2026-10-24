@@ -6,6 +6,8 @@ import { redirect } from "next/navigation";
 import { friendlyError } from "@/lib/auth/errors";
 import { INVITE_COOKIE } from "@/lib/auth/invite-cookie";
 import { requireUser } from "@/lib/auth/session";
+import { ensureCreditGrant } from "@/lib/credits/ledger";
+import { createSupabaseServiceClient } from "@/lib/db/service";
 import { setLiteDefaultIfUnset } from "@/lib/lite-mode.server";
 import { fieldErrors, type FieldErrors } from "@/lib/validation/auth";
 import { createOrgSchema } from "@/lib/validation/org";
@@ -51,6 +53,10 @@ export async function createOrganization(
     primary_language: parsed.data.market === "NG" ? "en-NG" : "en-GB",
   });
   if (brandError) console.error("[onboarding] brand insert failed", brandError.message);
+
+  // First month's credit allowance (spec §5).
+  const svc = createSupabaseServiceClient();
+  if (svc) await ensureCreditGrant(svc, org);
 
   await db
     .from("profiles")

@@ -43,6 +43,19 @@ export async function createUser(tag = "user", fullName?: string) {
   return { id: data.user.id, email, client };
 }
 
+let capRaised = false;
+
+/** Local test DBs accumulate orgs across runs; lift the beta cap so tests don't hit `beta_full`. */
+async function raiseOrgCap() {
+  if (capRaised) return;
+  await serviceClient()
+    .from("app_settings")
+    .update({ max_orgs: 1_000_000 })
+    .eq("id", true)
+    .lt("max_orgs", 1_000_000);
+  capRaised = true;
+}
+
 export async function createInvite(
   opts: { maxUses?: number; market?: "UK" | "NG" | null; expiresAt?: string | null } = {},
 ) {
@@ -61,6 +74,7 @@ export async function createInvite(
 
 /** Signs up a user and creates their org via the real RPC (with a fresh invite). */
 export async function createUserWithOrg(tag: string, market: "UK" | "NG" = "UK") {
+  await raiseOrgCap();
   const user = await createUser(tag);
   const code = await createInvite();
   const { data: org, error } = await user.client.rpc("create_organization", {
@@ -75,5 +89,9 @@ export async function createUserWithOrg(tag: string, market: "UK" | "NG" = "UK")
     .select()
     .single();
   if (brandError) throw brandError;
+  await serviceClient().rpc("ensure_credit_grant", {
+    p_org: org.id,
+    p_allowance: market === "UK" ? 15_000 : 10_000,
+  });
   return { ...user, org, brand };
 }

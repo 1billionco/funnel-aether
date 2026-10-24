@@ -210,6 +210,7 @@ describe("invite gating (create_organization)", () => {
     ).toContain("signups_closed");
 
     await svc.from("app_settings").update({ signup_mode: "open" }).eq("id", true);
+    await svc.from("app_settings").update({ max_orgs: 1_000_000 }).eq("id", true);
     const open = await createUser("open");
     expect(
       (await open.client.rpc("create_organization", { p_name: "Open", p_market: "UK" })).error,
@@ -272,9 +273,11 @@ describe("withOrg (service role scoping)", () => {
 
   it("forces org_id on insert even if another is supplied", async () => {
     const scoped = withOrg(serviceClient(), a.org.id);
-    await scoped.insert("jobs", { type: "test", org_id: b.org.id } as never);
-    const { data } = await serviceClient().from("jobs").select("org_id").eq("type", "test");
-    expect(data?.every((j) => j.org_id === a.org.id)).toBe(true);
+    const type = `test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    await scoped.insert("jobs", { type, org_id: b.org.id } as never);
+    const { data } = await serviceClient().from("jobs").select("org_id").eq("type", type);
+    expect(data).toHaveLength(1);
+    expect(data![0]!.org_id).toBe(a.org.id);
   });
 
   it("refuses an empty org id", () => {

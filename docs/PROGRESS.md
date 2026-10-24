@@ -55,3 +55,21 @@
 - UI: Brand page (summary, samples with live status, profile, training-quality card with tips); onboarding steps "Examples of your writing" and "Your brand summary".
 
 **Tests:** unit 98 · db 34 (processing, stale-count regression, k-results with HNSW + filter, keep or delete original, failure path, telemetry, cross-tenant retrieval, chunk and storage isolation) · e2e 28 (adds paste, signed upload, SSRF refusal, summary approve, at 360px and desktop).
+
+## M3 — Content Studio, Approval Queue, router, credits (done)
+
+**Built**
+
+- Schema: drafts, draft_versions, approval_events, credit_ledger, generation_reservations, ai_daily_spend; org credit balance. SQL functions: `ensure_credit_grant`, `reserve_generation` (kill switch, global daily budget, free daily cap, balance; all atomic), `settle_generation`, `refund_generation`, `sweep_stuck_drafts`. All are service-role only.
+- Router (`lib/ai/router.ts`): free → fast always; paid → fast by default, smart for long-form or regenerate after fast, one low-match escalation (D-029). `router_reason` is recorded on drafts and usage_events; the admin shows the 7-day blend.
+- Credits (`lib/credits/meter.ts`): cost-based milli-credits, ¼-credit minimum, worst case reserved, typical estimate shown before generating, settled to actual, refunded on failure.
+- Generation core (`lib/generation/core.ts`): draft row `generating` before the model call, retrieval + 5-layer prompt with a cacheable brand block, streaming with a deadline (saved as `partial`, then Continue), output parsing, flags, brand-match score, versions, telemetry, events. Long-form types run as `generate_draft` background jobs with progressive writes.
+- `/api/generate` streams NDJSON; `sweep-drafts` scheduled function every 5 minutes.
+- Create: market templates, brief with brand defaults, credit estimate and balance, live streaming into version cards, choose a version, "Open in Review".
+- Review: filters, list + detail (desktop), swipe cards (mobile) with undo, LinkedIn / Instagram / Facebook / X / email / WhatsApp / web previews, brand-match chip with reasons, flags (amber), approve / edit-then-approve / reject with reason / regenerate with feedback / continue, A/E/R/G and J/K shortcuts, bulk approve for low-risk drafts, version history with word diff, thumbs up/down, copy / WhatsApp click-to-chat / mark as posted / reminder for approved assets.
+- Onboarding step 5 generates the first draft and lands in Review with a welcome note. Today shows real counts and a credits ring; the sidebar shows a credits meter and the amber Review badge.
+- Admin: kill switch, daily budget, today's spend, router blend.
+
+**Tests:** unit 124 · db 48 (ledger reconciliation, settle/refund, insufficient credits, daily cap, kill switch, concurrent budget, sweeper, generation incl. regenerate / partial / provider failure, draft RLS) · e2e 35 + 2 viewport-specific skips (generate → edit → approve with credits and audit, reject + regenerate, mobile swipe + undo, onboarding first draft, kill switch isolated in its own project).
+
+**Known gaps / next:** NG credit-pack checkout (M7); founder email on budget breach (M5); command palette (later); seeded demo orgs (Sarah/Chinedu) to be added with M4 data.

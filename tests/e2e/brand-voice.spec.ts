@@ -79,7 +79,8 @@ test("onboarding: add samples, approve the brand summary, see the score", async 
   expect(brand?.training_quality_score).toBeGreaterThan(0);
 
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("button", { name: "Finish" }).click();
+  await expect(page).toHaveURL(/\/setup\/first-draft$/);
+  await page.getByRole("button", { name: "Skip for now" }).click();
   await expect(page).toHaveURL(/\/today$/);
   await page.goto(`/${t.org.slug}/brand`);
   await expect(page.getByTestId("quality-score")).toHaveText(String(brand?.training_quality_score));

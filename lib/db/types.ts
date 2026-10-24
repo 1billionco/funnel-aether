@@ -48,6 +48,28 @@ export type Database = {
         };
         Relationships: [];
       };
+      ai_daily_spend: {
+        Row: {
+          actual_usd: number;
+          breached_at: string | null;
+          day: string;
+          reserved_usd: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          actual_usd?: number;
+          breached_at?: string | null;
+          day: string;
+          reserved_usd?: number;
+        };
+        Update: {
+          actual_usd?: number;
+          breached_at?: string | null;
+          day?: string;
+          reserved_usd?: number;
+        };
+        Relationships: [];
+      };
       app_settings: {
         Row: {
           ai_daily_budget_usd: number;
@@ -78,6 +100,52 @@ export type Database = {
           updated_by?: string | null;
         };
         Relationships: [];
+      };
+      approval_events: {
+        Row: {
+          action: Database["public"]["Enums"]["approval_action"];
+          actor: string | null;
+          at: string;
+          draft_id: string;
+          id: number;
+          note: string | null;
+          org_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          action: Database["public"]["Enums"]["approval_action"];
+          actor?: string | null;
+          at?: string;
+          draft_id: string;
+          id?: never;
+          note?: string | null;
+          org_id: string;
+        };
+        Update: {
+          action?: Database["public"]["Enums"]["approval_action"];
+          actor?: string | null;
+          at?: string;
+          draft_id?: string;
+          id?: never;
+          note?: string | null;
+          org_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "approval_events_draft_id_fkey";
+            columns: ["draft_id"];
+            isOneToOne: false;
+            referencedRelation: "drafts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "approval_events_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       beta_invites: {
         Row: {
@@ -353,6 +421,218 @@ export type Database = {
           },
         ];
       };
+      credit_ledger: {
+        Row: {
+          balance_after: number;
+          created_at: string;
+          delta: number;
+          id: number;
+          note: string | null;
+          org_id: string;
+          reason: Database["public"]["Enums"]["ledger_reason"];
+          ref_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          balance_after: number;
+          created_at?: string;
+          delta: number;
+          id?: never;
+          note?: string | null;
+          org_id: string;
+          reason: Database["public"]["Enums"]["ledger_reason"];
+          ref_id?: string | null;
+        };
+        Update: {
+          balance_after?: number;
+          created_at?: string;
+          delta?: number;
+          id?: never;
+          note?: string | null;
+          org_id?: string;
+          reason?: Database["public"]["Enums"]["ledger_reason"];
+          ref_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "credit_ledger_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      draft_versions: {
+        Row: {
+          body: string;
+          created_at: string;
+          created_by: string | null;
+          draft_id: string;
+          feedback_text: string | null;
+          id: string;
+          metadata: NonNullable<Json>;
+          model_used: string | null;
+          org_id: string;
+          source: Database["public"]["Enums"]["version_source"];
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          body: string;
+          created_at?: string;
+          created_by?: string | null;
+          draft_id: string;
+          feedback_text?: string | null;
+          id?: string;
+          metadata?: NonNullable<Json>;
+          model_used?: string | null;
+          org_id: string;
+          source: Database["public"]["Enums"]["version_source"];
+          version: number;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          created_by?: string | null;
+          draft_id?: string;
+          feedback_text?: string | null;
+          id?: string;
+          metadata?: NonNullable<Json>;
+          model_used?: string | null;
+          org_id?: string;
+          source?: Database["public"]["Enums"]["version_source"];
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "draft_versions_draft_id_fkey";
+            columns: ["draft_id"];
+            isOneToOne: false;
+            referencedRelation: "drafts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "draft_versions_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      drafts: {
+        Row: {
+          approved_at: string | null;
+          approved_by: string | null;
+          body: string;
+          brand_id: string;
+          brand_match_reasons: NonNullable<Json>;
+          brand_match_score: number | null;
+          channel: string;
+          created_at: string;
+          created_by: string | null;
+          credits_used: number;
+          error: string | null;
+          flags: NonNullable<Json>;
+          generation_started_at: string | null;
+          id: string;
+          is_mock: boolean;
+          metadata: NonNullable<Json>;
+          model_used: string | null;
+          org_id: string;
+          posted_at: string | null;
+          prompt_version: string | null;
+          rejected_reason: string | null;
+          router_reason: string | null;
+          scheduled_for: string | null;
+          sent_at: string | null;
+          status: Database["public"]["Enums"]["draft_status"];
+          tier: string | null;
+          title: string | null;
+          type: Database["public"]["Enums"]["draft_type"];
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          approved_at?: string | null;
+          approved_by?: string | null;
+          body?: string;
+          brand_id: string;
+          brand_match_reasons?: NonNullable<Json>;
+          brand_match_score?: number | null;
+          channel: string;
+          created_at?: string;
+          created_by?: string | null;
+          credits_used?: number;
+          error?: string | null;
+          flags?: NonNullable<Json>;
+          generation_started_at?: string | null;
+          id?: string;
+          is_mock?: boolean;
+          metadata?: NonNullable<Json>;
+          model_used?: string | null;
+          org_id: string;
+          posted_at?: string | null;
+          prompt_version?: string | null;
+          rejected_reason?: string | null;
+          router_reason?: string | null;
+          scheduled_for?: string | null;
+          sent_at?: string | null;
+          status?: Database["public"]["Enums"]["draft_status"];
+          tier?: string | null;
+          title?: string | null;
+          type: Database["public"]["Enums"]["draft_type"];
+          updated_at?: string;
+        };
+        Update: {
+          approved_at?: string | null;
+          approved_by?: string | null;
+          body?: string;
+          brand_id?: string;
+          brand_match_reasons?: NonNullable<Json>;
+          brand_match_score?: number | null;
+          channel?: string;
+          created_at?: string;
+          created_by?: string | null;
+          credits_used?: number;
+          error?: string | null;
+          flags?: NonNullable<Json>;
+          generation_started_at?: string | null;
+          id?: string;
+          is_mock?: boolean;
+          metadata?: NonNullable<Json>;
+          model_used?: string | null;
+          org_id?: string;
+          posted_at?: string | null;
+          prompt_version?: string | null;
+          rejected_reason?: string | null;
+          router_reason?: string | null;
+          scheduled_for?: string | null;
+          sent_at?: string | null;
+          status?: Database["public"]["Enums"]["draft_status"];
+          tier?: string | null;
+          title?: string | null;
+          type?: Database["public"]["Enums"]["draft_type"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "drafts_brand_id_fkey";
+            columns: ["brand_id"];
+            isOneToOne: false;
+            referencedRelation: "brands";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "drafts_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       events: {
         Row: {
           at: string;
@@ -427,6 +707,60 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "feedback_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      generation_reservations: {
+        Row: {
+          actual_cost_usd: number | null;
+          actual_millicredits: number | null;
+          created_at: string;
+          day: string;
+          draft_id: string | null;
+          est_cost_usd: number;
+          est_millicredits: number;
+          id: string;
+          org_id: string;
+          settled_at: string | null;
+          status: Database["public"]["Enums"]["reservation_status"];
+          user_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          actual_cost_usd?: number | null;
+          actual_millicredits?: number | null;
+          created_at?: string;
+          day?: string;
+          draft_id?: string | null;
+          est_cost_usd?: number;
+          est_millicredits: number;
+          id?: string;
+          org_id: string;
+          settled_at?: string | null;
+          status?: Database["public"]["Enums"]["reservation_status"];
+          user_id?: string | null;
+        };
+        Update: {
+          actual_cost_usd?: number | null;
+          actual_millicredits?: number | null;
+          created_at?: string;
+          day?: string;
+          draft_id?: string | null;
+          est_cost_usd?: number;
+          est_millicredits?: number;
+          id?: string;
+          org_id?: string;
+          settled_at?: string | null;
+          status?: Database["public"]["Enums"]["reservation_status"];
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "generation_reservations_org_id_fkey";
             columns: ["org_id"];
             isOneToOne: false;
             referencedRelation: "organizations";
@@ -603,6 +937,8 @@ export type Database = {
           business_address: string | null;
           created_at: string;
           created_by: string | null;
+          credit_balance_milli: number;
+          credits_granted_for: string | null;
           currency: Database["public"]["Enums"]["currency"];
           deleted_at: string | null;
           id: string;
@@ -626,6 +962,8 @@ export type Database = {
           business_address?: string | null;
           created_at?: string;
           created_by?: string | null;
+          credit_balance_milli?: number;
+          credits_granted_for?: string | null;
           currency: Database["public"]["Enums"]["currency"];
           deleted_at?: string | null;
           id?: string;
@@ -648,6 +986,8 @@ export type Database = {
           business_address?: string | null;
           created_at?: string;
           created_by?: string | null;
+          credit_balance_milli?: number;
+          credits_granted_for?: string | null;
           currency?: Database["public"]["Enums"]["currency"];
           deleted_at?: string | null;
           id?: string;
@@ -792,6 +1132,8 @@ export type Database = {
           business_address: string | null;
           created_at: string;
           created_by: string | null;
+          credit_balance_milli: number;
+          credits_granted_for: string | null;
           currency: Database["public"]["Enums"]["currency"];
           deleted_at: string | null;
           id: string;
@@ -817,6 +1159,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      ensure_credit_grant: { Args: { p_allowance: number; p_org: string }; Returns: number };
       get_signup_mode: {
         Args: Record<PropertyKey, never>;
         Returns: Database["public"]["Enums"]["signup_mode"];
@@ -834,12 +1177,30 @@ export type Database = {
         Args: { p_capacity: number; p_cost?: number; p_key: string; p_refill_per_second: number };
         Returns: boolean;
       };
+      refund_generation: {
+        Args: { p_actual_cost_usd?: number; p_reservation: string };
+        Returns: number;
+      };
+      reserve_generation: {
+        Args: {
+          p_allowance: number;
+          p_daily_cap: number;
+          p_draft: string;
+          p_est_cost_usd: number;
+          p_est_millicredits: number;
+          p_org: string;
+          p_user: string;
+        };
+        Returns: Json;
+      };
       set_org_market: {
         Args: { p_market: Database["public"]["Enums"]["market"]; p_org: string };
         Returns: {
           business_address: string | null;
           created_at: string;
           created_by: string | null;
+          credit_balance_milli: number;
+          credits_granted_for: string | null;
           currency: Database["public"]["Enums"]["currency"];
           deleted_at: string | null;
           id: string;
@@ -865,19 +1226,50 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      settle_generation: {
+        Args: { p_actual_cost_usd: number; p_actual_millicredits: number; p_reservation: string };
+        Returns: number;
+      };
+      sweep_stuck_drafts: { Args: { p_older_than?: string }; Returns: number };
       touch_org_activity: { Args: { p_org: string }; Returns: undefined };
     };
     Enums: {
+      approval_action:
+        | "approve"
+        | "edit"
+        | "reject"
+        | "regenerate"
+        | "schedule"
+        | "send"
+        | "post"
+        | "undo"
+        | "archive";
       currency: "GBP" | "NGN";
       document_source: "upload" | "paste" | "url";
       document_status: "uploading" | "queued" | "processing" | "ready" | "failed";
+      draft_status:
+        | "generating"
+        | "partial"
+        | "failed"
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "scheduled"
+        | "sent"
+        | "posted"
+        | "archived";
+      draft_type:
+        "social_post" | "email" | "whatsapp" | "landing_copy" | "seo_brief" | "campaign_step";
       feedback_kind: "nps" | "bug" | "idea" | "draft_rating";
       job_status: "queued" | "running" | "succeeded" | "failed";
+      ledger_reason: "monthly_grant" | "generation" | "pack_purchase" | "refund" | "admin_adjust";
       market: "UK" | "NG";
       member_role: "owner" | "editor" | "reviewer";
       org_status: "active" | "dormant" | "pruned";
       plan_id: "free" | "growth" | "advanced";
+      reservation_status: "reserved" | "settled" | "refunded";
       signup_mode: "open" | "invite" | "closed";
+      version_source: "ai" | "human_edit" | "ai_regen";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -992,16 +1384,50 @@ export const Constants = {
   },
   public: {
     Enums: {
+      approval_action: [
+        "approve",
+        "edit",
+        "reject",
+        "regenerate",
+        "schedule",
+        "send",
+        "post",
+        "undo",
+        "archive",
+      ],
       currency: ["GBP", "NGN"],
       document_source: ["upload", "paste", "url"],
       document_status: ["uploading", "queued", "processing", "ready", "failed"],
+      draft_status: [
+        "generating",
+        "partial",
+        "failed",
+        "pending",
+        "approved",
+        "rejected",
+        "scheduled",
+        "sent",
+        "posted",
+        "archived",
+      ],
+      draft_type: [
+        "social_post",
+        "email",
+        "whatsapp",
+        "landing_copy",
+        "seo_brief",
+        "campaign_step",
+      ],
       feedback_kind: ["nps", "bug", "idea", "draft_rating"],
       job_status: ["queued", "running", "succeeded", "failed"],
+      ledger_reason: ["monthly_grant", "generation", "pack_purchase", "refund", "admin_adjust"],
       market: ["UK", "NG"],
       member_role: ["owner", "editor", "reviewer"],
       org_status: ["active", "dormant", "pruned"],
       plan_id: ["free", "growth", "advanced"],
+      reservation_status: ["reserved", "settled", "refunded"],
       signup_mode: ["open", "invite", "closed"],
+      version_source: ["ai", "human_edit", "ai_regen"],
     },
   },
 } as const;
