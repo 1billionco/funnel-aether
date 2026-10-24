@@ -11,7 +11,16 @@ Working notes for the privacy notice, DPA and records of processing. Not legal a
 
 ## Lawful basis per data type
 
-_To be completed as features ship (M1 auth, M4 leads, M5 email, M7 billing)._
+| Data                                                | Purpose                                           | Lawful basis (UK GDPR / NDPA)                                              |
+| --------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------- |
+| Account (email, name, auth provider)                | Provide the service, sign-in                      | Contract                                                                   |
+| Business profile (name, country, timezone, address) | Provide the service, currency, legal email footer | Contract                                                                   |
+| Brand questionnaire                                 | Generate content in the brand's voice             | Contract                                                                   |
+| First-party product events                          | Run and improve the beta, validation metrics      | Legitimate interests (no third-party tracking; PostHog only after consent) |
+| Feedback messages                                   | Improve the product                               | Legitimate interests                                                       |
+| Hashed IP for rate limiting                         | Security, abuse prevention                        | Legitimate interests (salted hash, raw IP not stored)                      |
+
+_Leads (M4), email sends (M5) and billing (M7) are added as they ship._
 
 ## Sub-processors and transfers
 

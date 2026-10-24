@@ -4,5 +4,4 @@ pnpm-lock.yaml
 supabase/.temp
 playwright-report
 test-results
-lib/db/types.ts
 docs/BUILD_SPEC.md

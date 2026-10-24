@@ -26,6 +26,8 @@ export default defineConfig({
     ? undefined
     : {
         command: `pnpm start --port ${PORT}`,
+        // One IP runs every sign-in; production builds ignore this flag.
+        env: { RATE_LIMIT_BYPASS: "1" },
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,

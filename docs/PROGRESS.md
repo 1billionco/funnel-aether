@@ -1,6 +1,6 @@
 # Progress
 
-## M0 — Foundations (done, awaiting review)
+## M0 — Foundations (done)
 
 **Built**
 
@@ -23,3 +23,21 @@
 **Not done / blocked**
 
 - Netlify site not connected yet (Joshua). The "Netlify preview shows `/dev/ui`" check is still pending.
+
+## M1 — Auth, tenancy, onboarding, events (done)
+
+**Built**
+
+- Schema: organizations, memberships, profiles, brands (questionnaire), app_settings, beta_invites, invite_redemptions, events, feedback, jobs, admin_audit, rate limits. RLS on every table plus column grants (D-015).
+- RPCs: `create_organization` (sign-up mode, invite codes, org cap, one owned org; D-014), `set_org_market` (locked after first payment), `complete_onboarding`, `touch_org_activity`, `rate_limit_take`, `get_signup_mode`, `check_invite_code`.
+- Auth: password, magic link and Google (Server Actions), `/auth/callback` for links and OAuth, `proxy.ts` session refresh plus redirect of signed-out visitors, invite code kept across redirects in a cookie.
+- Onboarding: `/onboarding` (country + business), then `/{org}/setup/{brand|samples|summary|first-draft}` with progress bar and skippable steps. Samples, summary and first draft are placeholders until M2/M3.
+- App shell: desktop sidebar (amber Review badge), top bar (business switcher, Create, feedback, account menu), mobile bottom tabs (Today, Review, Create, Leads, More), Lite mode (server-decided, slow-connection hint).
+- Screens: Today (greeting, next best step, waiting for you, checklist), Brand (questionnaire editor), Settings (profile, business and country, Lite mode, theme, team list), honest placeholders for Review, Create, Leads, Campaigns, Analytics and Billing.
+- Plans and entitlements config (`lib/credits/plans.ts`, `can` / `limit`).
+- Founder admin `/admin`: sign-up mode, org cap, invite codes, business list.
+- Events: `signed_up` (DB trigger), `onboarding_started`, `onboarding_completed`, `feedback_submitted`; in-app feedback button on every app page.
+
+**Tests:** unit 52 · db 27 (cross-tenant RLS, column grants, invite gating, withOrg scoping, rate limit) · e2e 26 (sign-up → onboarding at 360px and desktop, cross-tenant 404, signed-out redirect, admin 404, brand save, Lite mode).
+
+**Joshua to do:** see GO_LIVE (Supabase Auth settings).

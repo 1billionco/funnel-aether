@@ -28,16 +28,11 @@ jobs:
       - run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: next-build
-          path: .next
-          include-hidden-files: true
-          retention-days: 1
 
-  db:
-    name: DB / RLS tests (Supabase local)
+  integration:
+    name: DB/RLS + E2E (Supabase local, mock providers)
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -47,24 +42,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:start
+      - run: ./scripts/write-local-env.sh
       - run: pnpm test:db
-
-  e2e:
-    name: E2E (mock providers)
-    needs: checks
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - uses: actions/download-artifact@v4
-        with:
-          name: next-build
-          path: .next
+      - run: pnpm build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v4

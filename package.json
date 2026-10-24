@@ -14,10 +14,10 @@
     "test:watch": "vitest",
     "test:db": "vitest run --config vitest.db.config.mts",
     "test:e2e": "playwright test",
-    "db:start": "supabase start -x studio,edge-runtime,logflare,vector,imgproxy,supavisor,postgres-meta,mailpit",
+    "db:start": "supabase start -x studio,edge-runtime,logflare,vector,imgproxy,supavisor,postgres-meta",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local > lib/db/types.ts",
+    "db:types": "supabase gen types typescript --local > lib/db/types.ts && prettier --write lib/db/types.ts",
     "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm test"
   },
   "dependencies": {

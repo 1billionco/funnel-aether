@@ -29,4 +29,4 @@ All variables are optional in code. A missing key degrades to a labelled mock or
 
 Build-time only (set automatically): `CONTEXT` (Netlify) → `NEXT_PUBLIC_APP_ENV`.
 
-Test-only: `TEST_DATABASE_URL` (defaults to the local Supabase stack), `ALLOW_REMOTE_TEST_DB=1` (for a dedicated test project only), `E2E_BASE_URL` (runs e2e against a deployed preview).
+Test-only: `RATE_LIMIT_BYPASS=1` (ignored in production builds; D-018), `TEST_DATABASE_URL` (defaults to the local Supabase stack), `ALLOW_REMOTE_TEST_DB=1` (for a dedicated test project only), `E2E_BASE_URL` (runs e2e against a deployed preview).

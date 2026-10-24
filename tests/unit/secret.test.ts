@@ -15,3 +15,15 @@ describe("verifySharedSecret", () => {
     expect(verifySharedSecret(null, undefined)).toBe(false);
   });
 });
+
+import { rateLimitBypassed } from "@/lib/security/rate-limit";
+
+describe("rateLimitBypassed", () => {
+  it("only bypasses outside production", () => {
+    expect(rateLimitBypassed({ RATE_LIMIT_BYPASS: "1", NEXT_PUBLIC_APP_ENV: "local" })).toBe(true);
+    expect(rateLimitBypassed({ RATE_LIMIT_BYPASS: "1", NEXT_PUBLIC_APP_ENV: "production" })).toBe(
+      false,
+    );
+    expect(rateLimitBypassed({ NEXT_PUBLIC_APP_ENV: "local" })).toBe(false);
+  });
+});

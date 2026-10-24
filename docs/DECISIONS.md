@@ -59,3 +59,31 @@ Fraunces, Geist and Geist Mono are self-hosted at build time by `next/font`, so 
 ## D-013 · CI runners pinned to `ubuntu-24.04`
 
 `ubuntu-latest` moved to Ubuntu 26 on 19 Oct 2026, and `playwright install --with-deps` for the pinned Playwright 1.56 failed there. The runners are pinned to 24.04 until Playwright is upgraded (do that together with the sandbox browser, D-010).
+
+## D-014 · Invite gating enforced in `create_organization` (M1)
+
+Invite codes are checked when the user creates a business, inside the `create_organization` RPC, which locks the invite row and redeems it atomically. They aren't checked at account creation. This covers Google OAuth (no form to check): the code is stored in an httpOnly cookie before the redirect and passed to the RPC during onboarding. An un-invited account can exist, but it can't create an org, which is the thing that consumes resources. A Supabase "before user created" hook was considered and rejected for now: it needs per-environment dashboard setup and would add a second place to keep in sync. The RPC also enforces sign-up mode (`open | invite | closed`), the `max_orgs` cap and one owned org per user (founder admins exempt).
+
+## D-015 · Column-level grants for server-owned fields (M1)
+
+RLS decides which rows a member can touch; column grants decide which fields. Users can't write `organizations.plan`, `market_locked`, `onboarding_completed_at`, `brands.training_quality_score` / counts, or `profiles.is_founder_admin`, even on their own rows. Those change only through SECURITY DEFINER RPCs or the service role. Tests cover it (`tests/db/tenancy.test.ts`).
+
+## D-016 · URL shape `/{org-slug}/…` with reserved slugs (M1)
+
+Following the spec's `/(app)/[org]` layout, app URLs sit at the root (`/hartley-co/today`). Static routes win over the dynamic segment, and a reserved-slug list in SQL (`private.is_reserved_slug`) stops an org taking `admin`, `sign-in`, `f`, `api` and so on. A missing org and a forbidden org both return 404, so URLs don't reveal which slugs exist.
+
+## D-017 · Lite mode decision and fonts (M1)
+
+Lite mode is decided server-side in the root layout: explicit cookie (`fa_lite` = `1` or `0`), else the `Save-Data: on` header. NG orgs have `lite_mode_default = true`, which sets the cookie on first sign-in or onboarding if the user hasn't chosen. `navigator.connection` only _suggests_ switching (a banner). Fonts use `preload: false` so Lite mode, which doesn't attach the font CSS variables, downloads no font files. The cost is a brief font swap on first paint in full mode. Reading cookies in the root layout makes every route dynamic; that is acceptable because nearly every route is per-user anyway (D-005).
+
+## D-018 · Rate limits: Postgres token bucket, test bypass (M1)
+
+`rate_limit_take()` is service-role only. Auth attempts are limited per IP hash (10 per 10 minutes) and per email (5 per 15 minutes). The e2e suite signs everyone in from one IP, so `RATE_LIMIT_BYPASS=1` disables limits **only when the build isn't production** (`NEXT_PUBLIC_APP_ENV` is inlined from Netlify's `CONTEXT`). A unit test covers the guard.
+
+## D-019 · Post-sign-in routing (M1)
+
+A Server Action that redirects to a Route Handler leaves the client router stuck on the handler URL. The landing page is therefore computed inside the sign-in action and the email/OAuth callback (`afterSignIn`), which also mirrors `FOUNDER_ADMIN_EMAILS` into the profile flag and applies the org's Lite default. `/auth/continue` is a plain page that redirects.
+
+## D-020 · Deferred from M1
+
+Team invitations (Advanced plan seats) and the ⌘K command palette are deferred to later milestones; Settings shows the seat count, and the top bar has a Create button. Data export and org deletion (Settings → Data & privacy) are deferred to M9 with an interim "email the founder" note.
