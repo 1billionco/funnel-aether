@@ -73,3 +73,11 @@
 **Tests:** unit 124 · db 48 (ledger reconciliation, settle/refund, insufficient credits, daily cap, kill switch, concurrent budget, sweeper, generation incl. regenerate / partial / provider failure, draft RLS) · e2e 35 + 2 viewport-specific skips (generate → edit → approve with credits and audit, reject + regenerate, mobile swipe + undo, onboarding first draft, kill switch isolated in its own project).
 
 **Known gaps / next:** NG credit-pack checkout (M7); founder email on budget breach (M5); command palette (later); seeded demo orgs (Sarah/Chinedu) to be added with M4 data.
+
+## Post-M3 fixes (go-live)
+
+- Home page links to sign-up and sign-in.
+- Email links: the callback redirected to the server's internal host, losing the new session, so people landed back on sign-in (D-033). Fixed. Opening a link in another browser now explains that the email is confirmed and asks you to sign in. Clear messages for unconfirmed email and expired links; callback failures are logged to the function log.
+- Local stack mirrors production auth URLs (site URL and redirect list on port 3100) so e2e tests read real emails from Mailpit.
+
+**Tests:** unit 129 · db 48 · e2e 39 + 2 viewport skips (adds email link sign-in and link in another browser).

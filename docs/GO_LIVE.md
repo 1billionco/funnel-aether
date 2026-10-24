@@ -13,7 +13,7 @@ Each milestone adds items here. Full launch steps are completed in M9.
 - [ ] **Supabase prod on the Pro plan before real users join.** Free projects pause after inactivity and have no automated backups.
 - [ ] **Supabase migrations:** apply `supabase/migrations` to each project (`supabase link --project-ref <ref>` then `supabase db push`). Never run `supabase/seed.sql` against prod.
 - [ ] **Supabase Auth → URL configuration:** Site URL = production URL; add `https://<site>/auth/callback` and `https://deploy-preview-*--<site>.netlify.app/auth/callback` to Redirect URLs.
-- [ ] **Supabase Auth → Email Templates:** make links work in any browser or device (no PKCE cookie needed). In **Confirm signup** and **Magic link**, replace `{{ .ConfirmationURL }}` with `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email`. Needs Site URL set correctly.
+- [ ] **Supabase Auth → Email Templates (optional, recommended):** links already work in the browser that signed up; this makes them work in any browser or device too (no PKCE cookie needed). In **Confirm signup** and **Magic link**, replace `{{ .ConfirmationURL }}` with `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email`. Needs Site URL set correctly.
 - [ ] **Supabase Auth → Providers:** enable Google (create an OAuth client in Google Cloud; authorised redirect URI = `https://<project>.supabase.co/auth/v1/callback`). Keep email confirmations on.
 - [ ] **Supabase Auth → SMTP:** use Resend SMTP for auth emails (the built-in sender is heavily rate-limited).
 - [ ] **Netlify env:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `FOUNDER_ADMIN_EMAILS`, `CRON_SECRET`.

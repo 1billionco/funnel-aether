@@ -3,6 +3,7 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { createSupabaseServerClient } from "@/lib/db/server";
+import { requestOrigin } from "@/lib/auth/origin";
 import { afterSignIn } from "@/lib/auth/post-sign-in";
 
 /**
@@ -13,12 +14,11 @@ import { afterSignIn } from "@/lib/auth/post-sign-in";
 export async function GET(request: NextRequest) {
   const url = request.nextUrl;
   const requestedNext = url.searchParams.get("next");
+  const origin = requestOrigin(request.headers);
   const fail = (reason: string, detail?: string) => {
     // Shows in the Netlify function log; the visitor only sees a mapped message.
     console.error("[auth/callback]", reason, detail ?? "");
-    return NextResponse.redirect(
-      new URL(`/sign-in?error=${encodeURIComponent(reason)}`, request.url),
-    );
+    return NextResponse.redirect(new URL(`/sign-in?error=${encodeURIComponent(reason)}`, origin));
   };
 
   const db = await createSupabaseServerClient();
@@ -30,7 +30,12 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const { error } = await db.auth.exchangeCodeForSession(code);
-    if (error) return fail("link_expired", `exchange: ${error.message}`);
+    if (error) {
+      // Opened in a different browser from the one that asked for the link. Supabase has
+      // still confirmed the email, so the visitor only needs to sign in here.
+      if (error.code === "pkce_code_verifier_not_found") return fail("link_other_browser");
+      return fail("link_expired", `exchange: ${error.message}`);
+    }
   } else if (tokenHash && type) {
     const { error } = await db.auth.verifyOtp({ token_hash: tokenHash, type });
     if (error) return fail("link_expired", `verify: ${error.message}`);
@@ -47,5 +52,5 @@ export async function GET(request: NextRequest) {
   const home = await afterSignIn(db, data.user);
   const next = safeNextPath(requestedNext, home);
 
-  return NextResponse.redirect(new URL(next, request.url));
+  return NextResponse.redirect(new URL(next, origin));
 }

@@ -144,3 +144,7 @@ Members can read drafts, versions, audit and ledger under RLS; all writes use th
 ## D-032 · Undo is a server action, not a delayed commit (M3)
 
 Approve and reject happen immediately, so nothing is lost if the tab closes. The toast's Undo calls `undoDecision`, which works for the same user within 10 minutes and is audited as `undo`.
+
+## D-033 · Auth redirects use the public host, not `request.url` (post-M3 fix)
+
+On Netlify (and under `next start`), `request.url` in a Route Handler can carry an internal or deploy-specific host. The email-link callback set the session cookie on the public host, then redirected to that other host, so people landed back on sign-in. Redirects now use `requestOrigin()` (x-forwarded-host, then Host). If a link is opened in a different browser from the one that asked for it (no PKCE verifier cookie), Supabase has still confirmed the email, so the callback says so and asks the visitor to sign in. The `token_hash` email template is optional: it makes links work across browsers and devices too.

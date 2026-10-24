@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { friendlyError } from "@/lib/auth/errors";
 import { INVITE_COOKIE, INVITE_COOKIE_OPTIONS } from "@/lib/auth/invite-cookie";
+import { requestOrigin } from "@/lib/auth/origin";
 import { afterSignIn } from "@/lib/auth/post-sign-in";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { createSupabaseServerClient } from "@/lib/db/server";
@@ -29,12 +30,7 @@ export interface AuthFormState {
 async function origin() {
   const env = parseEnv();
   if (env.NEXT_PUBLIC_SITE_URL) return env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto =
-    h.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
-  return `${proto}://${host}`;
+  return requestOrigin(await headers());
 }
 
 async function allowAuthAttempt(email?: string) {

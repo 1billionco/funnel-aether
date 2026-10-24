@@ -1,10 +1,11 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 import {
   choosePasswordTab,
   createInvite,
   createUser,
   expectNoHorizontalOverflow,
+  latestEmailLink,
   onboardedTenant,
   serviceClient,
   signInWithPassword,
@@ -88,6 +89,36 @@ test.describe("sign-up and onboarding", () => {
     await page.getByLabel("Password").fill("a-strong-password-1");
     await page.getByRole("button", { name: "Create account" }).click();
     await expect(page.getByText("You need an invite code to join the beta.")).toBeVisible();
+  });
+});
+
+test.describe("email links", () => {
+  async function requestLink(page: Page, email: string) {
+    await page.goto("/sign-in");
+    await page.getByLabel("Email").fill(email);
+    await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+    await expect(page.getByText(/sent a sign-in link/)).toBeVisible();
+    return latestEmailLink(email);
+  }
+
+  test("an email link signs you in on the public host", async ({ page }) => {
+    const user = await createUser("emaillink");
+    const link = await requestLink(page, user.email);
+    await page.goto(link);
+    // Regression: the callback used to redirect to the server's internal host,
+    // which had no session cookie, so people landed back on sign-in.
+    await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/onboarding$/);
+  });
+
+  test("a link opened in another browser explains what to do", async ({ page, browser }) => {
+    const user = await createUser("otherbrowser");
+    const link = await requestLink(page, user.email);
+    const other = await browser.newContext();
+    const otherPage = await other.newPage();
+    await otherPage.goto(link);
+    await expect(otherPage).toHaveURL(/\/sign-in\?error=link_other_browser/);
+    await expect(otherPage.getByText(/Your email is confirmed/)).toBeVisible();
+    await other.close();
   });
 });
 

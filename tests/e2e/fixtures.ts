@@ -54,3 +54,25 @@ export async function expectNoHorizontalOverflow(page: Page) {
   );
   expect(overflow).toBeLessThanOrEqual(0);
 }
+
+const MAILPIT_URL = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
+
+/** Latest auth link sent to `email`, read from the local stack's Mailpit. */
+export async function latestEmailLink(email: string): Promise<string> {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const res = await fetch(
+      `${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`,
+    );
+    const list = (await res.json()) as { messages?: { ID: string }[] };
+    const id = list.messages?.[0]?.ID;
+    if (id) {
+      const msg = (await (await fetch(`${MAILPIT_URL}/api/v1/message/${id}`)).json()) as {
+        Text: string;
+      };
+      const link = msg.Text.match(/https?:\/\/\S+\/auth\/v1\/verify\S+/)?.[0];
+      if (link) return link.replace(/[)>]+$/, "");
+    }
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  throw new Error(`No auth email for ${email}`);
+}

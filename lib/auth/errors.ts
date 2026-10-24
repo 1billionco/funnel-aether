@@ -14,6 +14,8 @@ const MESSAGES: Record<string, string> = {
   not_configured: "Sign-in isn't set up on this server yet (no database connected).",
   email_not_confirmed:
     "Confirm your email first: open the link we sent you. If it has expired, sign up again with the same email to get a new one.",
+  link_other_browser:
+    "Your email is confirmed. That link opened in a different browser from the one you signed up in, so sign in here to continue.",
   link_expired: "That link has expired or was already used. Request a new one.",
 };
 
