@@ -15,13 +15,19 @@ export default function HomePage() {
         We&apos;re building in the open with a small group of UK and Nigerian businesses. You
         approve everything before it goes out.
       </p>
-      {showDevLinks ? (
-        <div>
-          <Button asChild variant="outline">
+      <div className="flex flex-wrap gap-3">
+        <Button asChild>
+          <Link href="/sign-up">Join with an invite code</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href="/sign-in">Sign in</Link>
+        </Button>
+        {showDevLinks ? (
+          <Button asChild variant="ghost">
             <Link href="/dev/ui">View the design system</Link>
           </Button>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </main>
   );
 }

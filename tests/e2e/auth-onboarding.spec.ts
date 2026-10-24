@@ -15,7 +15,10 @@ test.describe("sign-up and onboarding", () => {
     const code = await createInvite();
     const email = `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 6)}@example.test`;
 
-    await page.goto("/sign-up");
+    await page.goto("/");
+    await expect(page.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/sign-in");
+    await page.getByRole("link", { name: "Join with an invite code" }).click();
+    await expect(page).toHaveURL(/\/sign-up/);
     await choosePasswordTab(page);
     await page.getByLabel("Your name").fill("Chinedu Okafor");
     await page.getByLabel("Email").fill(email);
