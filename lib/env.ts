@@ -36,6 +36,7 @@ export const envSchema = z.object({
   CREDIT_VALUE_USD: num(0.002),
   GENERATION_DEADLINE_MS: num(25_000),
   BACKGROUND_FN_SECRET: optional,
+  JOB_RUNNER: optional,
   RESEND_API_KEY: optional,
   EMAIL_FROM_DOMAIN: optional,
   STRIPE_SECRET_KEY: optional,

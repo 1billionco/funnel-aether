@@ -87,3 +87,23 @@ A Server Action that redirects to a Route Handler leaves the client router stuck
 ## D-020 · Deferred from M1
 
 Team invitations (Advanced plan seats) and the ⌘K command palette are deferred to later milestones; Settings shows the seat count, and the top bar has a Create button. Data export and org deletion (Settings → Data & privacy) are deferred to M9 with an interim "email the founder" note.
+
+## D-021 · Job runner: background function or `after()` (M2)
+
+`dispatchJob()` writes a `jobs` row, then either POSTs the job ID to `/.netlify/functions/run-job-background` with the shared secret (when `JOB_RUNNER=netlify`), or runs it with `next/server` `after()` within the route's time limit. Inline is the default locally, in CI, and on a Netlify plan without Background Functions. Payloads hold IDs only. Set `JOB_RUNNER=netlify` once the `probe-background` check passes. Document processing for typical uploads (a few pages) finishes well inside the inline limit.
+
+## D-022 · MMR diversity uses word overlap, not vectors (M2)
+
+Retrieval asks Postgres for the 20 most similar chunks (`match_brand_chunks`, pgvector 0.8 iterative HNSW scan so the brand and model filter still returns k rows), then picks 6 with maximal marginal relevance. Relevance is the DB cosine similarity; redundancy is Jaccard word overlap between chunks. That avoids sending 20 × 1024 floats back on every request (about 70–90 ms per round trip from Netlify's US region to London). Revisit if retrieved samples look repetitive.
+
+## D-023 · Onboarding brand summary isn't charged credits (M2)
+
+The summary is a one-off onboarding step on the fast model, and the credit ledger arrives in M3. It is logged in `usage_events` (`feature = brand_summary`, `router_reason = onboarding_fast`), so it counts in cost telemetry, but no credits are deducted. Content generation (M3) is metered.
+
+## D-024 · `model_prices` seeded from Anthropic's published rates (M2)
+
+The spec says prices are never hard-coded and Joshua fills them in. The table is seeded with Anthropic's published October 2026 rates (Haiku 5.5: $0.10 / $0.50; Sonnet 5.5: $2 / $10, cache read $0.20). Where a cache price isn't published, it's derived from the documented 0.1× read and 1.25× write multipliers. Every seeded row has `verified_at = NULL` until Joshua confirms it. Voyage's price is left NULL (cost recorded as 0) for Joshua to fill in. **Note for the credit economics:** Haiku 5.5 is roughly 10× cheaper than the spec's planning assumption, so most fast generations will hit the 0.25-credit minimum.
+
+## D-025 · Model request profiles (M2)
+
+The LLM request shape is chosen per model family (`lib/ai/anthropic.ts` `modelProfile`). On Haiku 5.5 thinking is off and effort is low (short marketing copy doesn't benefit from it). Sonnet 5.5 uses `thinking: between_tools` (its supported way to turn thinking off) at medium effort, plus Anthropic's server-side refusal fallback (`fallbacks: "default"`), which reruns a declined request on another model inside the same call. No sampling parameters are sent (the API rejects `temperature` since 21 Oct 2026). Prompt caching markers go on the stable brand block only when it is at least 512 tokens, the minimum for current models.

@@ -113,6 +113,156 @@ export type Database = {
         };
         Relationships: [];
       };
+      brand_chunks: {
+        Row: {
+          brand_id: string;
+          chunk_index: number;
+          content: string;
+          created_at: string;
+          document_id: string;
+          embedding: string;
+          embedding_model: string;
+          id: string;
+          org_id: string;
+          token_count: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          brand_id: string;
+          chunk_index: number;
+          content: string;
+          created_at?: string;
+          document_id: string;
+          embedding: string;
+          embedding_model: string;
+          id?: string;
+          org_id: string;
+          token_count?: number;
+        };
+        Update: {
+          brand_id?: string;
+          chunk_index?: number;
+          content?: string;
+          created_at?: string;
+          document_id?: string;
+          embedding?: string;
+          embedding_model?: string;
+          id?: string;
+          org_id?: string;
+          token_count?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "brand_chunks_brand_id_fkey";
+            columns: ["brand_id"];
+            isOneToOne: false;
+            referencedRelation: "brands";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "brand_chunks_document_id_fkey";
+            columns: ["document_id"];
+            isOneToOne: false;
+            referencedRelation: "brand_documents";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "brand_chunks_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      brand_documents: {
+        Row: {
+          brand_id: string;
+          char_count: number;
+          chunk_count: number;
+          created_at: string;
+          created_by: string | null;
+          deleted_at: string | null;
+          doc_type: string;
+          error: string | null;
+          filename: string | null;
+          id: string;
+          keep_original: boolean;
+          mime: string | null;
+          org_id: string;
+          processed_at: string | null;
+          size_bytes: number | null;
+          source: Database["public"]["Enums"]["document_source"];
+          source_url: string | null;
+          status: Database["public"]["Enums"]["document_status"];
+          storage_path: string | null;
+          title: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          brand_id: string;
+          char_count?: number;
+          chunk_count?: number;
+          created_at?: string;
+          created_by?: string | null;
+          deleted_at?: string | null;
+          doc_type?: string;
+          error?: string | null;
+          filename?: string | null;
+          id?: string;
+          keep_original?: boolean;
+          mime?: string | null;
+          org_id: string;
+          processed_at?: string | null;
+          size_bytes?: number | null;
+          source: Database["public"]["Enums"]["document_source"];
+          source_url?: string | null;
+          status?: Database["public"]["Enums"]["document_status"];
+          storage_path?: string | null;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          brand_id?: string;
+          char_count?: number;
+          chunk_count?: number;
+          created_at?: string;
+          created_by?: string | null;
+          deleted_at?: string | null;
+          doc_type?: string;
+          error?: string | null;
+          filename?: string | null;
+          id?: string;
+          keep_original?: boolean;
+          mime?: string | null;
+          org_id?: string;
+          processed_at?: string | null;
+          size_bytes?: number | null;
+          source?: Database["public"]["Enums"]["document_source"];
+          source_url?: string | null;
+          status?: Database["public"]["Enums"]["document_status"];
+          storage_path?: string | null;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "brand_documents_brand_id_fkey";
+            columns: ["brand_id"];
+            isOneToOne: false;
+            referencedRelation: "brands";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "brand_documents_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       brands: {
         Row: {
           audience: string | null;
@@ -411,6 +561,43 @@ export type Database = {
           },
         ];
       };
+      model_prices: {
+        Row: {
+          cache_read_per_mtok: number | null;
+          cache_write_per_mtok: number | null;
+          input_per_mtok: number | null;
+          model: string;
+          notes: string | null;
+          output_per_mtok: number | null;
+          provider: string;
+          updated_at: string;
+          verified_at: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          cache_read_per_mtok?: number | null;
+          cache_write_per_mtok?: number | null;
+          input_per_mtok?: number | null;
+          model: string;
+          notes?: string | null;
+          output_per_mtok?: number | null;
+          provider: string;
+          updated_at?: string;
+          verified_at?: string | null;
+        };
+        Update: {
+          cache_read_per_mtok?: number | null;
+          cache_write_per_mtok?: number | null;
+          input_per_mtok?: number | null;
+          model?: string;
+          notes?: string | null;
+          output_per_mtok?: number | null;
+          provider?: string;
+          updated_at?: string;
+          verified_at?: string | null;
+        };
+        Relationships: [];
+      };
       organizations: {
         Row: {
           business_address: string | null;
@@ -512,11 +699,86 @@ export type Database = {
         };
         Relationships: [];
       };
+      usage_events: {
+        Row: {
+          at: string;
+          cache_write_tokens: number;
+          cached_tokens: number;
+          est_cost_usd: number;
+          feature: string;
+          id: number;
+          input_tokens: number;
+          is_mock: boolean;
+          latency_ms: number | null;
+          model: string;
+          org_id: string | null;
+          output_tokens: number;
+          provider: string;
+          ref_id: string | null;
+          router_reason: string | null;
+          user_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          at?: string;
+          cache_write_tokens?: number;
+          cached_tokens?: number;
+          est_cost_usd?: number;
+          feature: string;
+          id?: never;
+          input_tokens?: number;
+          is_mock?: boolean;
+          latency_ms?: number | null;
+          model: string;
+          org_id?: string | null;
+          output_tokens?: number;
+          provider: string;
+          ref_id?: string | null;
+          router_reason?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          at?: string;
+          cache_write_tokens?: number;
+          cached_tokens?: number;
+          est_cost_usd?: number;
+          feature?: string;
+          id?: never;
+          input_tokens?: number;
+          is_mock?: boolean;
+          latency_ms?: number | null;
+          model?: string;
+          org_id?: string | null;
+          output_tokens?: number;
+          provider?: string;
+          ref_id?: string | null;
+          router_reason?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "usage_events_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
+      brand_centroid: { Args: { p_brand: string; p_model: string }; Returns: string };
+      brand_document_stats: {
+        Args: { p_brand: string };
+        Returns: {
+          chunk_count: number;
+          doc_types: string[];
+          document_count: number;
+        }[];
+      };
       check_invite_code: { Args: { p_code: string }; Returns: boolean };
       complete_onboarding: { Args: { p_org: string }; Returns: undefined };
       create_organization: {
@@ -559,6 +821,15 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: Database["public"]["Enums"]["signup_mode"];
       };
+      match_brand_chunks: {
+        Args: { p_brand: string; p_k?: number; p_model: string; p_query: string };
+        Returns: {
+          content: string;
+          document_id: string;
+          id: string;
+          similarity: number;
+        }[];
+      };
       rate_limit_take: {
         Args: { p_capacity: number; p_cost?: number; p_key: string; p_refill_per_second: number };
         Returns: boolean;
@@ -598,6 +869,8 @@ export type Database = {
     };
     Enums: {
       currency: "GBP" | "NGN";
+      document_source: "upload" | "paste" | "url";
+      document_status: "uploading" | "queued" | "processing" | "ready" | "failed";
       feedback_kind: "nps" | "bug" | "idea" | "draft_rating";
       job_status: "queued" | "running" | "succeeded" | "failed";
       market: "UK" | "NG";
@@ -720,6 +993,8 @@ export const Constants = {
   public: {
     Enums: {
       currency: ["GBP", "NGN"],
+      document_source: ["upload", "paste", "url"],
+      document_status: ["uploading", "queued", "processing", "ready", "failed"],
       feedback_kind: ["nps", "bug", "idea", "draft_rating"],
       job_status: ["queued", "running", "succeeded", "failed"],
       market: ["UK", "NG"],

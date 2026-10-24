@@ -41,3 +41,17 @@
 **Tests:** unit 52 · db 27 (cross-tenant RLS, column grants, invite gating, withOrg scoping, rate limit) · e2e 26 (sign-up → onboarding at 360px and desktop, cross-tenant 404, signed-out redirect, admin 404, brand save, Lite mode).
 
 **Joshua to do:** see GO_LIVE (Supabase Auth settings).
+
+## M2 — Brand Voice / RAG (done)
+
+**Built**
+
+- Schema: `brand_documents`, `brand_chunks` (vector(1024), HNSW cosine, `embedding_model` per row), `usage_events`, `model_prices`; `match_brand_chunks` (iterative scan, model-filtered, RLS-invoker), `brand_centroid`, `brand_document_stats`; private `brand-docs` bucket (10 MB, allowed types, org-scoped read/delete policies).
+- Ingest: signed-URL uploads (browser → Storage, never through a route), paste, and website import via an SSRF-safe fetch (public IPs only, checked at connect time, redirects re-validated, 8 s / 2 MB caps).
+- Pipeline (`lib/brand-voice/process.ts`): extract (PDF, DOCX, TXT, MD, CSV; 60-page / 200k-character caps) → chunk (ported 800/150 recursive splitter) → embed (Voyage, or labelled mock) → store → delete original unless kept → fresh stats → quality score → `brand_trained` event. Failures get friendly messages and a retry button. A re-embed function is ready for model changes.
+- Jobs: `jobs` table, `dispatchJob` (Netlify background function or `after()`; D-021), `run-job-background` function.
+- LLM layer: `AnthropicProvider` (streaming, per-model profiles, cache markers, refusal fallback; D-025), deterministic `MockProvider`, `usage_events` telemetry costed from `model_prices`.
+- Brand summary: AI draft → owner edits → approve (only approved summaries reach prompts). Not charged (D-023).
+- UI: Brand page (summary, samples with live status, profile, training-quality card with tips); onboarding steps "Examples of your writing" and "Your brand summary".
+
+**Tests:** unit 98 · db 34 (processing, stale-count regression, k-results with HNSW + filter, keep or delete original, failure path, telemetry, cross-tenant retrieval, chunk and storage isolation) · e2e 28 (adds paste, signed upload, SSRF refusal, summary approve, at 360px and desktop).

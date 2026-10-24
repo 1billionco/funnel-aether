@@ -14,6 +14,7 @@ All variables are optional in code. A missing key degrades to a labelled mock or
 | `GENERATION_DEADLINE_MS`                                  | streamed generation                 | 25000                      | About 5s under the Netlify sync limit (D-007)                      |
 | `VOYAGE_API_KEY`                                          | embeddings                          | deterministic mock vectors | Mock vectors are stored with `embedding_model = 'mock'`            |
 | `EMBEDDING_MODEL` / `EMBEDDING_DIM`                       | embeddings                          | `voyage-4-lite` / 1024     | Changing the model requires the re-embed job                       |
+| `JOB_RUNNER`                                              | background jobs                     | `after()` inline           | Set to `netlify` once Background Functions are confirmed (D-021)   |
 | `CREDIT_VALUE_USD`                                        | credit metering                     | 0.002                      | 1 credit = $0.002 of model cost                                    |
 | `AI_DAILY_BUDGET_USD`                                     | global kill-switch seed             | 5                          | Also editable in admin (`app_settings`)                            |
 | `BACKGROUND_FN_SECRET`                                    | invoking background functions       | invocations rejected       | `openssl rand -hex 32`                                             |

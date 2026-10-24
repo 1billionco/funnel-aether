@@ -12,7 +12,7 @@ export async function getCoreLoopInput(
 ): Promise<CoreLoopInput> {
   return {
     brandProfileDone: !!(brand?.offer && brand?.audience),
-    brandTrained: (brand?.document_count ?? 0) > 0,
+    brandTrained: (brand?.document_count ?? 0) > 0 || brand?.summary_status === "approved",
     draftsGenerated: 0,
     draftsApproved: 0,
     pendingDrafts: 0,

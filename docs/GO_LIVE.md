@@ -17,6 +17,8 @@ Each milestone adds items here. Full launch steps are completed in M9.
 - [ ] **Supabase Auth → SMTP:** use Resend SMTP for auth emails (the built-in sender is heavily rate-limited).
 - [ ] **Netlify env:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `FOUNDER_ADMIN_EMAILS`, `CRON_SECRET`.
 - [ ] **First invite:** sign in with a `FOUNDER_ADMIN_EMAILS` address, open `/admin` and create invite codes. Sign-up mode starts as **invite**.
+- [ ] **Model prices:** open `model_prices` (admin, coming in M6, or the Supabase table editor), confirm each Claude row against Anthropic's pricing page, fill in Voyage's price, and set `verified_at`.
+- [ ] **Background jobs:** if the probe passes, set `JOB_RUNNER=netlify` and `BACKGROUND_FN_SECRET` in Netlify env.
 - [ ] **Anthropic Console and Voyage dashboard:** set a monthly spend limit as a backstop outside the app.
 - [ ] **Resend:** verify the sending domain (e.g. `mail.funnelaether.com`); check the current free-tier daily and monthly send limits.
 - [ ] **Paystack:** confirm live-account eligibility (registered business in a Paystack country, with a local bank account) before M7 goes live.
